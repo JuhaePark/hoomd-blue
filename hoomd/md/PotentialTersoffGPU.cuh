@@ -501,7 +501,15 @@ __global__ void gpu_compute_triplet_forces_kernel(Scalar4* d_force,
                 evaluator eval(rij_sq, rcutsq, param);
                 eval.evalPhi(s_phi_ab[threadIdx.x * ntypes + __scalar_as_int(postypej.w)]);
                 }
-
+	    Scalar phi(0.0);
+	    for (unsigned int type = 0; type < ntypes; ++type)
+	        {
+		phi += s_phi_ab[threadIdx.x * ntypes + type];
+	        }
+	    for (unsigned int type = 0; type < ntypes; ++type)
+	        {
+		s_phi_ab[threadIdx.x * ntypes + type] = phi;
+		}
             // self-energy
             for (unsigned int typ_b = 0; typ_b < ntypes; ++typ_b)
                 {
@@ -524,7 +532,7 @@ __global__ void gpu_compute_triplet_forces_kernel(Scalar4* d_force,
                     Scalar energy(0.0);
 
                     eval.evalSelfEnergy(energy, phi);
-                    forcei.w += energy;
+                    forcei.w += energy/ntypes;
                     }
                 }
             }
