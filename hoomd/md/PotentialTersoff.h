@@ -647,6 +647,15 @@ template<class evaluator> void PotentialTersoff<evaluator>::computeForces(uint64
                     evaluator eval(rij_sq, rcutsq, param);
                     eval.evalPhi(phi_ab[typej]);
                     }
+		Scalar phi(0.0);
+		for (unsigned int type=0; type<ntypes; ++type)
+		    {
+		    phi += phi_ab[type];
+		    }
+		for (unsigned int type=0; type<ntypes; ++type)
+		    {
+		    phi_ab[type] = phi;
+		    }
 
                 // self-energy
                 for (unsigned int typ_b = 0; typ_b < ntypes; ++typ_b)
@@ -657,7 +666,7 @@ template<class evaluator> void PotentialTersoff<evaluator>::computeForces(uint64
                     evaluator eval(Scalar(0.0), rcutsq, param);
                     Scalar energy(0.0);
                     eval.evalSelfEnergy(energy, phi_ab[typ_b]);
-                    pei += energy;
+                    pei += energy/ntypes;
                     }
                 }
 
